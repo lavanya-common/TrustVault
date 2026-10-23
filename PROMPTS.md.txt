@@ -1,0 +1,42 @@
+# TrustVault — AI Prompts Log
+
+This file records representative prompts used while developing and reviewing the TrustVault project.
+
+## Entry 1 — 2026-10-20
+**Topic:** Project architecture
+
+**Prompt:** Help me plan a document management application with authentication, document ownership, role-based access control, and audit logging.
+
+**Use:** To organize the main application components and requirements.
+
+## Entry 2 — 2026-10-21
+**Topic:** Authentication
+
+**Prompt:** Explain how to implement password hashing and signed, expiring JWT authentication in a FastAPI application.
+
+**Use:** To understand authentication and token validation.
+
+## Entry 3 — 2026-10-21
+**Topic:** Document permissions
+
+**Prompt:** Review document access rules for administrators, owners, and viewers. Identify ways to prevent unauthorized document access.
+
+**Use:** To review access-control requirements.
+
+## Entry 4 — 2026-10-22
+**Topic:** Security testing
+
+**Prompt:** Help write automated tests to verify that users without permission cannot upload, download, view, edit, or delete protected documents.
+
+**Use:** To develop and run security tests.
+
+## Entry 5 — 2026-10-23
+**Topic:** Security review and documentation
+
+**Prompt:** Help identify potential risks in a document management application, including exposed tokens, unsafe uploads, permission errors, and missing audit logs.
+
+**Use:** To prepare the threat model and identify additional security checks.
+
+## Note
+
+These entries summarize representative AI-assisted development activities. They should be adjusted if they do not accurately reflect the prompts used during development. AI suggestions were reviewed and tested as part of the implementation process.

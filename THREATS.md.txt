@@ -1,0 +1,69 @@
+# TrustVault — Threat Model
+
+## 1. Project Overview
+
+TrustVault is a document management application built with FastAPI and SQLite. It supports user authentication, document uploads, document access permissions, search, and audit logging.
+
+## 2. Assets to Protect
+
+- User passwords and authentication tokens
+- Uploaded documents and their contents
+- Document ownership and access permissions
+- User information
+- Audit logs and security-related events
+- Application secret keys
+
+## 3. Potential Threats
+
+### Threat 1: Unauthorized Document Access
+**Risk:** A viewer may attempt to access another user's private document.
+
+**Mitigation:** Verify authentication and document permissions on every document access request. Test access restrictions for users without permission.
+
+### Threat 2: Unauthorized Document Modification or Deletion
+**Risk:** A user may try to edit or delete a document they do not own.
+
+**Mitigation:** Enforce owner or administrator authorization on modification and deletion operations.
+
+### Threat 3: Password Exposure
+**Risk:** Storing passwords as plain text could expose user credentials.
+
+**Mitigation:** Store passwords using a secure password-hashing algorithm such as Argon2. Never store plain-text passwords.
+
+### Threat 4: Authentication Token Theft
+**Risk:** A stolen or exposed token may allow another person to act as the authenticated user until the token expires.
+
+**Mitigation:** Use signed, time-limited tokens, protect secret keys, avoid sharing tokens, and rotate exposed secrets.
+
+### Threat 5: Malicious File Upload
+**Risk:** An attacker may upload an excessively large or unexpected file.
+
+**Mitigation:** Validate file size, permitted file types, and filenames. Store uploaded files using server-generated names.
+
+### Threat 6: Unauthorized Permission Changes
+**Risk:** A user may attempt to grant or revoke document access without authorization.
+
+**Mitigation:** Restrict permission management to authorized document owners or administrators and record permission changes in audit logs.
+
+### Threat 7: Missing Security Audit Records
+**Risk:** Suspicious activity may be difficult to investigate if events are not recorded.
+
+**Mitigation:** Record relevant document operations, permission changes, and denied access attempts. Restrict audit-log access to administrators.
+
+## 4. Security Testing
+
+The current automated security test suite contains seven tests covering login requirements, upload restrictions, audit-log authorization, and unauthorized document access, editing, and deletion.
+
+The test suite passed seven tests during local testing. Additional tests and a review of the implementation are required before claiming complete security coverage.
+
+## 5. Limitations and Future Improvements
+
+- Review and restrict CORS settings before public deployment.
+- Rotate any exposed authentication secrets before deployment.
+- Add further tests for permission changes, invalid uploads, and expired tokens.
+- Use HTTPS in production.
+- Keep dependencies updated and avoid committing secrets or private documents to the repository.
+
+## 6. Disclaimer
+
+This document describes intended protections and potential threats. It does not independently prove that every mitigation is implemented or that the application is completely secure.
