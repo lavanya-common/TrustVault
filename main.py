@@ -12,6 +12,7 @@ from database import get_connection
 from auth import verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="TrustVault API")
+create_tables()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
