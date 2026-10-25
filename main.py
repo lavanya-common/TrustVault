@@ -2,6 +2,7 @@
 import os
 import uuid
 from pathlib import Path
+from database import create_tables
 
 from fastapi import (
     FastAPI, HTTPException, Depends, UploadFile, File, Form
