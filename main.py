@@ -45,7 +45,7 @@ class LoginRequest(BaseModel):
 
 @app.get("/")
 def home():
-    return {"message": "TrustVault API is running"}
+    return FileResponse(Path(__file__).resolve().parent / "index.html")
 
 
 @app.get("/health")
