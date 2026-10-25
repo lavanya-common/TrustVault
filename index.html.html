@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="data:,">
+  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrustVault | Security Dashboard</title>
+<style>
+:root{--bg:#061323;--panel:#0b2035;--panel2:#102b45;--line:#1b4563;--text:#e9f6ff;--muted:#8eafc7;--teal:#20e0cf;--blue:#26a9f7;--red:#ff637b;--yellow:#ffbf47}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top left,#123b59,#061323 50%);color:var(--text);font:14px Arial,sans-serif}
+button,input,select{font:inherit}
+button{border:1px solid #138aab;border-radius:8px;padding:10px 14px;background:linear-gradient(100deg,#087eaa,#10bdb5);color:white;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.15)}
+button.secondary{background:#102c45;border-color:#285271}
+input,select{width:100%;min-width:0;background:#07192b;color:var(--text);border:1px solid #285271;border-radius:8px;padding:12px}
+label{display:block;color:var(--muted);margin:12px 0 6px;font-size:12px}
+.hidden{display:none!important}
+.loginwrap{min-height:100vh;display:grid;place-items:center;padding:20px}
+.login{width:min(420px,100%);background:#091e32;border:1px solid #1d5874;border-radius:17px;padding:30px;box-shadow:0 20px 60px #0008}
+.brand{font-size:23px;font-weight:bold;margin-bottom:8px}.brand span{color:var(--teal)}
+.login button{width:100%;margin-top:18px}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+aside{background:#061525;border-right:1px solid var(--line);padding:22px 14px}
+.subbrand{font-size:10px;letter-spacing:1px;color:var(--muted);margin:8px 0 28px}
+.navlabel{font-size:10px;letter-spacing:2px;color:#7296b2;margin:22px 10px 8px}
+.navitem{display:block;text-decoration:none;padding:12px;border-radius:8px;margin:4px 0;color:#c6dced;cursor:pointer}
+.navitem:hover,.navitem.active{background:#103b4b;color:var(--teal)}
+main{padding:25px;max-width:1500px;width:100%;margin:auto}
+.topbar,.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:19px}
+h1{font-size:27px;margin:0 0 8px}h2{font-size:18px;margin:0 0 8px}h3{font-size:15px}
+p{line-height:1.5}.muted{color:var(--muted)}.small{font-size:12px}
+.card{background:linear-gradient(145deg,#0d2942,#091b2e);border:1px solid var(--line);border-radius:13px;padding:18px;min-width:0;box-shadow:0 8px 24px #0002}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:17px}
+.metric .label{color:var(--muted)}.metric .value{font-size:30px;font-weight:bold;margin:16px 0 7px}
+.columns{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:16px;margin-bottom:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.row>*{flex:1}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{font-size:12px;padding:8px 10px}
+.page-view{display:block}.page-view.hidden{display:none!important}
+.chart{height:205px;display:flex;align-items:end;justify-content:space-around;gap:12px;padding:15px 8px 25px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to top,transparent 0,transparent 39px,#24425a 40px)}
+.chart-col{height:100%;display:flex;flex:1;flex-direction:column;justify-content:end;align-items:center;gap:8px}
+.bar{width:65%;max-width:36px;border-radius:6px 6px 0 0;background:linear-gradient(#20e0cf,#1387d1)}
+.chart-col span{font-size:11px;color:var(--muted)}
+.doc,.event,.alert{padding:13px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.docname{font-size:15px;font-weight:bold}
+.tag{display:inline-block;padding:5px 8px;border-radius:20px;background:#173c59;color:#a8dcff;font-size:11px;margin:5px 5px 0 0}
+.tag.ok{background:#10473f;color:#9ff9df}.tag.warn{background:#502335;color:#ffc3cd}
+.empty{color:var(--muted);padding:15px 0}.message{white-space:pre-wrap;color:var(--teal);margin-top:12px}.error{color:#ff9eae}
+.feature{padding:13px 0;border-bottom:1px solid var(--line)}.feature strong{color:var(--teal)}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}aside{border-bottom:1px solid var(--line)}.navitem{display:inline-block;padding:9px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}main{padding:14px}}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr}.card{padding:13px}.topbar{align-items:flex-start;flex-direction:column}}
+
+.activity-chart-card {
+  background: #071a2d;
+  border: 1px solid #153d5c;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  color: #eaf6ff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.activity-chart-card h3 {
+  margin-top: 0;
+  color: #ffffff;
+}
+
+.activity-chart-card p {
+  color: #8db5d5;
+  font-size: 13px;
+}
+
+.activity-chart-card canvas {
+  width: 100% !important;
+  max-height: 300px;
+}
+
+</style>
+</head>
+<body>
+<section id="loginBox" class="loginwrap">
+ <div class="login">
+  <div class="brand">🔐 Trust<span>Vault</span></div>
+  <p class="muted">SECURE DOCUMENTS · TRUSTED ACCESS</p>
+  <h1>Welcome Back</h1><p class="muted">Sign in to your secure workspace.</p>
+  <form id="loginForm">
+   <label for="username">Username</label><input id="username" autocomplete="username" required>
+   <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+   <button type="submit">Login securely</button>
+  </form>
+  <p id="loginMessage" class="message"></p>
+ </div>
+</section>
+<div id="app" class="layout hidden">
+<aside>
+ <div class="brand">🔐 Trust<span>Vault</span></div>
+ <div class="subbrand">DOCUMENT SECURITY PLATFORM</div>
+ <div class="navlabel">WORKSPACE</div>
+ <a class="navitem active" href="#dashboardPage" data-page="dashboardPage">▦ Dashboard</a>
+ <a class="navitem" href="#documentsPage" data-page="documentsPage">▤ Documents</a>
+ <a class="navitem" href="#uploadPage" data-page="uploadPage">↑ Upload</a>
+ <a class="navitem" href="#permissionsPage" data-page="permissionsPage">♙ Permissions</a>
+ <div class="navlabel">SECURITY</div>
+ <a class="navitem" href="#activityPage" data-page="activityPage">◷ Security Timeline</a>
+ <a class="navitem" href="#alertsPage" data-page="alertsPage">⚠ Security Alerts</a>
+ <hr><p class="muted small">Signed in as</p><strong id="signedInUser">User</strong>
+ <p><button class="secondary" onclick="logout()">Logout</button></p>
+</aside>
+<main>
+<section class="page-view" id="dashboardPage">
+ <div class="topbar"><div><p class="muted small">SECURITY WORKSPACE</p><h1>Dashboard</h1><div class="muted">Monitor documents, permissions and security activity.</div></div><button class="secondary" onclick="refreshDashboard()">↻ Refresh</button></div>
+ 
+<div class="card activity-chart-card">
+  <h3>Document Activity</h3>
+  <p class="muted">Access, denied access and permission changes</p>
+  <div style="height:300px; position:relative;">
+    <canvas id="documentActivityChart"></canvas>
+  </div>
+</div>
+
+ <div class="grid">
+  <div class="card metric"><div class="label">Total Documents</div><div class="value" id="docCount">—</div><div class="muted small">Accessible documents</div></div>
+  <div class="card metric"><div class="label">Activity Records</div><div class="value" id="activityCount">—</div><div class="muted small">Audit events</div></div>
+  <div class="card metric"><div class="label">Open Alerts</div><div class="value" id="alertCount">—</div><div class="muted small">Backend security alerts</div></div>
+  <div class="card metric"><div class="label">Session</div><div class="value" style="font-size:22px;color:var(--teal)">● Active</div><div class="muted small">Authenticated session</div></div>
+ </div>
+ <div class="columns">
+  <div class="card"><div class="sectionhead"><h2>Document Activity</h2><span class="tag ok">Weekly view</span></div>
+  <div class="card"><div class="sectionhead"><h2>Recent Activity</h2><button class="secondary" onclick="showPage('activityPage')">View all</button></div>
+   <div id="dashboardActivity" class="empty">Sign in to load activity.</div>
+   <hr><div class="sectionhead"><h2>Recent Alerts</h2><button class="secondary" onclick="showPage('alertsPage')">View all</button></div><div id="dashboardAlerts" class="muted small">Alerts require backend support.</div>
+  </div>
+ </div>
+ <div class="card"><h2>Unique Security Features</h2><div class="columns">
+  <div class="feature"><strong>◷ Security Activity Timeline</strong><p class="muted small">Chronological audit records of document actions.</p></div>
+  <div class="feature"><strong>◷ Temporary Document Access</strong><p class="muted small">Optional expiry when granting access is supported by the API.</p></div>
+ </div><div class="columns">
+  <div class="feature"><strong>⚠ Suspicious Activity Alerts</strong><p class="muted small">Display security alerts provided by the backend.</p></div>
+  <div class="feature"><strong>♙ Role-based Access Control</strong><p class="muted small">Backend authorization protects private documents.</p></div>
+ </div></div>
+</section>
+<section class="page-view hidden" id="documentsPage">
+ <div class="topbar"><div><p class="muted small">WORKSPACE</p><h1>Documents</h1><p class="muted">Search, download and manage accessible files.</p></div><button class="secondary" onclick="loadDocuments()">↻ Refresh</button></div>
+ <div class="card"><div class="row"><input id="searchName" placeholder="Filename"><input id="searchOwner" placeholder="Owner username"></div>
+ <div class="row"><input id="searchCategory" placeholder="Category"><input id="searchDate" type="date" aria-label="Upload date"></div>
+ <div class="actions"><button onclick="searchDocuments()">Search</button><button class="secondary" onclick="clearSearch()">Show all</button></div>
+ <div id="documents"><div class="empty">Sign in to load documents.</div></div></div>
+</section>
+<section class="page-view hidden" id="uploadPage">
+ <div class="topbar"><div><p class="muted small">WORKSPACE</p><h1>Upload Document</h1><p class="muted">Add a document to your secure workspace.</p></div></div>
+ <div class="card"><form id="uploadForm"><label for="documentFile">Choose file</label><input type="file" id="documentFile" required>
+ <label for="category">Document category</label><input id="category" value="General" maxlength="50" required>
+ <button style="margin-top:17px" type="submit">↑ Upload document</button></form><p id="uploadMessage" class="message"></p>
+ <hr><h3>Temporary Access</h3><p class="muted">Use Grant Access in Documents to set document permissions.</p></div>
+</section>
+<section class="page-view hidden" id="permissionsPage">
+ <div class="topbar"><div><p class="muted small">ACCESS CONTROL</p><h1>Permissions</h1><p class="muted">Grant access to a document you are authorized to manage.</p></div></div>
+ <div class="card"><h2>Document permissions</h2><p class="muted">Choose a document and use Grant Access. Your backend decides whether the action is permitted.</p><div id="permissionDocuments" class="empty">Sign in to load documents.</div></div>
+</section>
+<section class="page-view hidden" id="activityPage">
+ <div class="topbar"><div><p class="muted small">AUDIT LOG</p><h1>Security Timeline</h1><p class="muted">Recorded document and permission actions.</p></div><button class="secondary" onclick="loadActivity()">↻ Refresh</button></div>
+ <div class="card"><div id="activity" class="empty">Sign in to load audit activity.</div></div>
+</section>
+<section class="page-view hidden" id="alertsPage">
+ <div class="topbar"><div><p class="muted small">MONITORING</p><h1>Security Alerts</h1><p class="muted">Alerts reported by the backend API.</p></div><button class="secondary" onclick="loadAlerts()">↻ Refresh</button></div>
+ <div class="card"><div id="alerts" class="empty">Sign in to load alerts.</div></div>
+</section>
+<p id="globalMessage" class="message"></p>
+</main></div>
+<script>
+const API="http://127.0.0.1:8000";
+let token="",currentUsername="";
+const el=id=>document.getElementById(id);
+function msg(id,text,error=false){if(!el(id))return;el(id).textContent=text;el(id).classList.toggle("error",error)}
+async function request(url,options={}){
+ const headers={...(options.headers||{}),Authorization:"Bearer "+token};
+ const response=await fetch(API+url,{...options,headers});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.detail||"Request failed ("+response.status+")");
+ return data;
+}
+function node(tag,text,cls){const n=document.createElement(tag);n.textContent=text==null?"":String(text);if(cls)n.className=cls;return n}
+function showPage(id){
+ if(!el(id))return;
+ document.querySelectorAll("[data-page]").forEach(a=>a.classList.toggle("active",a.dataset.page===id));
+ document.querySelectorAll(".page-view").forEach(p=>p.classList.toggle("hidden",p.id!==id));
+ if(id==="documentsPage"||id==="permissionsPage")loadDocuments();
+ if(id==="activityPage")loadActivity();
+ if(id==="alertsPage")loadAlerts();
+}
+document.querySelectorAll("[data-page]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();showPage(a.dataset.page)}));
+el("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("loginMessage","Signing in…");
+ try{
+  const r=await fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:el("username").value.trim(),password:el("password").value})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail||"Login failed");
+  token=d.access_token;currentUsername=el("username").value.trim();
+  el("loginBox").classList.add("hidden");el("app").classList.remove("hidden");el("signedInUser").textContent=currentUsername;
+  showPage("dashboardPage");msg("globalMessage","Signed in successfully.");await refreshDashboard();
+ }catch(err){msg("loginMessage",err.message,true)}
+});
+async function loadDocuments(){
+ try{
+  const d=await request("/documents");const docs=d.documents||[];el("docCount").textContent=docs.length;renderDocuments(docs)}
+ catch(err){["documents","permissionDocuments"].forEach(id=>{if(el(id))el(id).replaceChildren(node("div",err.message,"empty"))});el("docCount").textContent="—"}
+}
+async function searchDocuments(){
+ try{const p=new URLSearchParams({name:el("searchName").value,owner:el("searchOwner").value,category:el("searchCategory").value,date:el("searchDate").value});
+ const d=await request("/documents/search?"+p);renderDocuments(d.documents||[]);el("docCount").textContent=(d.documents||[]).length;msg("globalMessage","Search completed.")}
+ catch(err){msg("globalMessage",err.message,true)}
+}
+function clearSearch(){["searchName","searchOwner","searchCategory","searchDate"].forEach(id=>el(id).value="");loadDocuments()}
+function renderDocuments(docs){
+ const area=el("documents"),perms=el("permissionDocuments");area.replaceChildren();if(perms)perms.replaceChildren();
+ if(!docs.length){area.append(node("div","No accessible documents found.","empty"));if(perms)perms.append(node("div","No accessible documents found.","empty"));return}
+ docs.forEach(doc=>{
+  const item=node("div","","doc");item.append(node("div",doc.filename||"Untitled document","docname"));
+  item.append(node("div","Category: "+(doc.category||"General")+" · Owner: "+(doc.owner||doc.owner_id||"Unknown"),"muted small"));
+  item.append(node("span","Document ID: "+doc.id,"tag"));
+  const actions=node("div","","actions");
+  const dl=node("button","Download");dl.onclick=()=>downloadDocument(doc);actions.append(dl);
+  const gr=node("button","Grant access");gr.className="secondary";gr.onclick=()=>grantAccess(doc);actions.append(gr);
+    const ed=node("button","Edit details");
+  ed.className="secondary";
+  ed.onclick=()=>editDocument(doc);
+  actions.append(ed);
+
+  const del=node("button","Delete");
+  del.style.background="#a51d3d";
+  del.style.borderColor="#ff637b";
+  del.onclick=()=>deleteDocument(doc);
+  actions.append(del);
+
+  item.append(actions);
+  area.append(item);
+  if(perms){const pi=node("div","","doc");pi.append(node("strong",doc.filename||"Untitled document"));const b=node("button","Grant access");b.className="secondary";b.style.marginLeft="10px";b.onclick=()=>grantAccess(doc);pi.append(b);perms.append(pi)}
+ })
+}
+async function deleteDocument(doc){
+  const confirmed = confirm(
+    'Are you sure you want to delete "' + doc.filename + '"?'
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const result = await request("/documents/" + doc.id, {
+      method: "DELETE"
+    });
+
+    msg("globalMessage", result.message || "Document deleted successfully.");
+    await loadDocuments();
+    await refreshDashboard();
+  } catch (err) {
+    msg("globalMessage", err.message, true);
+  }
+}
+async function downloadDocument(doc) {
+ try{
+  const r=await fetch(API+"/documents/"+doc.id+"/download",{headers:{Authorization:"Bearer "+token}});
+ if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||"Download failed ("+r.status+")")}
+ const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=doc.filename||"document";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);msg("globalMessage","Download started.")
+ }catch(err){msg("globalMessage",err.message,true)}
+}
+async function grantAccess(doc){
+ const username=prompt("Username of person receiving access:");if(!username||!username.trim())return;
+ const level=prompt("Access type: read or edit","read");if(!level||!["read","edit"].includes(level.trim().toLowerCase())){alert("Enter read or edit.");return}
+ const expiry=prompt("Optional expiry datetime in ISO format, or leave blank:","");
+ if(expiry===null)return;
+ const body={username:username.trim(),can_read:true,can_edit:level.trim().toLowerCase()==="edit"};
+ if(expiry.trim())body.expires_at=expiry.trim();
+ try{
+  const d=await request("/documents/"+doc.id+"/permissions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});msg("globalMessage",d.message||"Permission updated.");await loadActivity()}
+ catch(err){msg("globalMessage",err.message,true)}
+}
+async function editDocument(doc){
+ const filename=prompt("New filename:",doc.filename||"");if(filename===null)return;
+ const category=prompt("New category:",doc.category||"General");if(category===null)return;
+ try{
+  const d=await request("/documents/"+doc.id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({filename,category})});msg("globalMessage",d.message||"Document updated.");loadDocuments()}
+ catch(err){msg("globalMessage",err.message,true)}
+}
+el("uploadForm").addEventListener("submit",async e=>{
+ e.preventDefault();const file=el("documentFile").files[0];if(!file)return;
+ const form=new FormData();form.append("file",file);form.append("category",el("category").value.trim());
+ try{
+  const d=await request("/documents/upload",{method:"POST",body:form});msg("uploadMessage",d.message||"Upload successful.");el("uploadForm").reset();el("category").value="General";await loadDocuments();await loadActivity()}
+ catch(err){msg("uploadMessage",err.message,true)}
+});
+async function loadActivity(){
+ try{
+  const d=await request("/admin/audit-logs"),logs=d.audit_logs||[];el("activityCount").textContent=logs.length;
+  // Prepare the last 7 days for the activity graph
+const chartLabels = [];
+const accessData = Array(7).fill(0);
+const deniedData = Array(7).fill(0);
+const permissionData = Array(7).fill(0);
+const chartDates = [];
+
+for (let i = 6; i >= 0; i--) {
+  const date = new Date();
+  date.setDate(date.getDate() - i);
+  const key =
+    date.getFullYear() + "-" +
+    String(date.getMonth() + 1).padStart(2, "0") + "-" +
+    String(date.getDate()).padStart(2, "0");
+
+  chartDates.push(key);
+  chartLabels.push(
+    date.toLocaleDateString("en-US", { weekday: "short" })
+  );
+}
+
+logs.forEach(log => {
+  if (!log.created_at) return;
+
+  const date = new Date(log.created_at);
+  if (isNaN(date.getTime())) return;
+
+  const key =
+    date.getFullYear() + "-" +
+    String(date.getMonth() + 1).padStart(2, "0") + "-" +
+    String(date.getDate()).padStart(2, "0");
+
+  const index = chartDates.indexOf(key);
+  if (index === -1) return;
+
+  const action = (
+    (log.action || "") + " " + (log.details || "")
+  ).toLowerCase();
+
+  if (/denied|den y|unauthorized|failed access|access denied/.test(action)) {
+    deniedData[index]++;
+  } else if (/permission|grant access|revoke access/.test(action)) {
+    permissionData[index]++;
+  } else if (/access|download|view|read/.test(action)) {
+    accessData[index]++;
+  }
+});
+
+renderActivityChart(
+  chartLabels,
+  accessData,
+  deniedData,
+  permissionData
+);
+ const area=el("activity"),dash=el("dashboardActivity");area.replaceChildren();dash.replaceChildren();
+ if(!logs.length){area.append(node("div","No audit records yet.","empty"));dash.append(node("div","No audit records yet.","empty"));return}
+ logs.forEach((log,i)=>{const row=node("div","","event");row.append(node("strong",log.action||"Activity"));row.append(node("div",(log.username||"Unknown user")+" · Document "+(log.document_id??"N/A"),"muted small"));row.append(node("div",log.details||"","small"));row.append(node("div",log.created_at||"","muted small"));area.append(row);if(i<4)dash.append(row.cloneNode(true))})
+ }catch(err){el("activityCount").textContent="—";el("activity").replaceChildren(node("div","Activity API unavailable: "+err.message,"empty"));el("dashboardActivity").textContent="Activity unavailable."}
+}
+
+async function loadAlerts() {
+  const area = el("alerts");
+  const dash = el("dashboardAlerts");
+  const count = el("alertCount");
+
+  // Current backend does not provide a security-alerts endpoint.
+  const message =
+    "Security alerts API is not available in the current backend.";
+
+  if (area) {
+    area.replaceChildren(node("div", message, "empty"));
+  }
+
+  if (dash) {
+    dash.textContent = message;
+  }
+
+  if (count) {
+    count.textContent = "N/A";
+  }
+}
+
+let documentActivityChart;
+
+function renderActivityChart(labels, accessData, deniedData, permissionData) {
+  const canvas = document.getElementById("documentActivityChart");
+  if (!canvas || typeof Chart === "undefined") return;
+
+  if (documentActivityChart) {
+    documentActivityChart.destroy();
+  }
+
+  documentActivityChart = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Access",
+          data: accessData,
+          borderColor: "#20e6dc",
+          backgroundColor: "rgba(32,230,220,0.12)",
+          tension: 0.35
+        },
+        {
+          label: "Denied",
+          data: deniedData,
+          borderColor: "#ff5268",
+          backgroundColor: "rgba(255,82,104,0.10)",
+          tension: 0.35
+        },
+        {
+          label: "Permission Change",
+          data: permissionData,
+          borderColor: "#ffc247",
+          backgroundColor: "rgba(255,194,71,0.10)",
+          tension: 0.35
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: "#d9eaff" }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#8db5d5" },
+          grid: { color: "rgba(140,180,220,0.12)" }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: "#8db5d5", precision: 0 },
+          grid: { color: "rgba(140,180,220,0.12)" }
+        }
+      }
+    }
+  });
+}
+
+
+function logout(){token="";currentUsername="";el("app").classList.add("hidden");el("loginBox").classList.remove("hidden");el("password").value="";msg("loginMessage","");msg("globalMessage","Logged out.")}
+async function refreshDashboard() {
+  try {
+    await loadDocuments();
+    await loadActivity();
+    await loadAlerts();
+    msg("globalMessage", "Dashboard refreshed successfully.");
+  } catch (err) {
+    msg("globalMessage", err.message, true);
+  }
+}
+</script>
+</body>
+</html>
