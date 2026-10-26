@@ -10,10 +10,45 @@ from fastapi import (
 from pydantic import BaseModel
 from datetime import datetime, timezone
 from database import get_connection
-from auth import verify_password, create_access_token, get_current_user
+from auth import (
+    verify_password,
+    create_access_token,
+    get_current_user,
+    hash_password,
+)
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="TrustVault API")
 create_tables()
+def bootstrap_admin():
+    username = os.getenv("BOOTSTRAP_ADMIN_USERNAME")
+    password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD")
+
+    if not username or not password:
+        return
+
+    connection = get_connection()
+
+    try:
+        existing = connection.execute(
+            "SELECT id FROM users WHERE username = ?",
+            (username,)
+        ).fetchone()
+
+        if existing is None:
+            connection.execute(
+                """
+                INSERT INTO users (username, password_hash, role)
+                VALUES (?, ?, ?)
+                """,
+                (username, hash_password(password), "admin")
+            )
+            connection.commit()
+
+    finally:
+        connection.close()
+
+
+bootstrap_admin()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
